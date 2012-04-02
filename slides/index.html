@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js ie6" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->  <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+
+  <title>Erlang WebDev with WebMachine</title>
+
+  <meta name="description" content="A presentation on coding for the web with
+                                    Erlang and WebMachine."/>
+  <meta name="author" content="Tim McGilchrist"/>
+  <meta name="viewport" content="width=1024, user-scalable=no"/>
+
+  <!-- Core and extension CSS files -->
+  <link rel="stylesheet" href="core/deck.core.css"/>
+  <link rel="stylesheet" href="extensions/goto/deck.goto.css"/>
+  <link rel="stylesheet" href="extensions/menu/deck.menu.css"/>
+  <link rel="stylesheet" href="extensions/navigation/deck.navigation.css"/>
+  <link rel="stylesheet" href="extensions/status/deck.status.css"/>
+  <link rel="stylesheet" href="extensions/hash/deck.hash.css"/>
+
+  <link rel="stylesheet" href="extensions/codemirror/deck.codemirror.css"/>
+  <link rel="stylesheet" href="extensions/codemirror/themes/default.css"/>
+
+  <!-- Transition theme. More available in /themes/transition/ or create your own. -->
+  <link rel="stylesheet" href="themes/transition/horizontal-slide.css"/>
+
+  <script src="modernizr.custom.js"></script>
+</head>
+
+<body class="deck-container">
+
+<!-- Begin slides -->
+<section class="slide" id="title-slide">
+  <h1>Erlang WebDev with WebMachine</h1>
+
+  <h3>Tim McGilchrist (@lambda_foo)</h3>
+</section>
+
+<section class="slide" id="outline">
+  <h2>Outline</h2>
+  <ul>
+    <li>What is Webmachine?</li>
+    <li>General structure of a project</li>
+    <ul>
+      <li>Resources</li>
+      <li>Dispatch</li>
+    </ul>
+    <li>ErlDTL Templates</li>
+    <li>Using Rebar</li>
+  </ul>
+</section>
+
+<section class="slide" id="web_development">
+  <h2>Web Development</h2>
+  <p>
+    Any language worth it's salt needs to provide a web development library or
+    three. <br/>
+    www.coboloncogs.org anyone?
+  </p>
+  <p>General approaches to the web:</p>
+  <ul>
+    <li>focus on heavy three-tier applications. Java/EE</li>
+    <li>hide the web behind language-specific constructs. Rails/Django</li>
+    <li>provide low-level access to HTTP. Sinatra/Node.js</li>
+  </ul>
+</section>
+
+<section class="slide" id="what_webmachine">
+  <h2>What is Webmachine?</h2>
+  <p>
+    "Written in Erlang, Webmachine is an application layer that adds server-side
+    HTTP semantic awareness on top of the excellent bit-pushing and HTTP
+    syntax-management provided by mochiweb, " wiki.basho.com/Webmachine.html
+  </p>
+  <ul>
+    <li>Resource Oriented</li>
+    <li>Well behaved</li>
+    <li>Simple?</li>
+  </ul>
+  <p>
+    WebMachine is not a "framework"!
+  </p>
+</section>
+
+<section class="slide" id="htttp_simple?">
+  <h2>HTTP is Simple, Right?</h2>
+  <img src="images/http_flow.png"/>
+</section>
+
+<section class="slide" id="hello_webmachine">
+  <h2>Hello World WebMachine style</h2>
+  <pre>
+-module(hello_resource).
+-export([init/1, to_html/2]).
+-include_lib("webmachine/include/webmachine.hrl").
+
+init([]) ->
+    {ok, undefined}.
+
+to_html(ReqData, State) ->
+    {"Hello, Webmachine world", ReqData, State}.
+
+  </pre>
+  <img src="images/http_200.png"/>
+</section>
+
+<section class="slide" id="general_structure">
+  <h2>WebMachine Layout</h2>
+  <img src="images/webmachine-layout.png"/>
+</section>
+
+<section class="slide" id="wm_dispatch">
+  <h2>Dispatch Rules</h2>
+  <img src="images/webmachine-dispatch.png"/>
+  <ul>
+    <li>Define URI paths via {pathspec, resource, args} or {pathspec, guard, resource, args}</li>
+    <li>Terms used to match a rule are available via wrq:path_info(id,
+    ReqData)</li>
+    <li>Located in priv/dispatch.conf under the application root</li>
+  </ul>
+</section>
+
+<section class="slide" id="dispatch_example">
+  <h2>Dispatch Example</h2>
+  <pre>
+    {["todos", "*"], sm_todos_resource, []}.
+
+    GET "/todos/12/author"
+
+    "12/author"        => wrq:disp_path
+    "/todos/12/author" => wrq:path
+    []                 => wrq:path_info
+    ["12", "author"]   => wrq:path_tokens
+  </pre>
+</section>
+
+<section class="slide" id="wm_resources">
+  <h2>Resources</h2>
+  <p>
+    <strong>WebMachine is a resource server for the web!</strong>
+  </p>
+  <p>
+    Driven via HTTP methods (GET, PUT, POST, DELETE) and returning correct
+    status codes.
+  </p>
+  <p>
+    Well defined place to handle each HTTP method.
+  </p>
+  <ul>
+    <li>GET    => content_types_provided() and to_html()</li>
+    <li>PUT    => content_types_accepted() and from_html()</li>
+    <li>POST   => create_path() or process_post()</li>
+    <li>DELETE => delete_resource() </li>
+  </ul>
+</section>
+
+<section class="slide" id="resource_example">
+  <h2>Example</h2>
+  <p>A Todo Resource pulled from a demo app.</p>
+  <img src="images/resources_1.png"/>
+</section>
+
+<section class="slide" id="resource_example2">
+  <h2>Example Cont</h2>
+  <img src="images/resources_2.png"/>
+</section>
+
+<section class="slide" id="erldtl_templates">
+  <h2>ErlDTL Templates</h2>
+  <p>
+    Django style templates for Erlang, similar to JSP and ERB templates.<br/>
+    <a href ="https://github.com/evanmiller/erlydtl">https://github.com/evanmiller/erlydtl</a>
+  </p>
+  <ul>
+    <li>Simple html with tags sprinkled throughout.</li>
+    <li>Place in <b>templates</b> directory and rebar knows what to do</li>
+    <li>Call it just like an Module, eg todo_dtl:render([Arg])</li>
+  </ul>
+  <img src="images/erldtl-templates.png"/>
+</section>
+
+<section class="slide" id="rebar">
+  <h2>Building with Rebar</h2>
+  <ol>
+    <li>Create a top level rebar.conf</li>
+    <li>Put in your dependencies</li>
+    <li>Compile and off you go</li>
+  </ol>
+  <img src="images/rebar-config.png"/>
+</section>
+
+<section class="slide" id="gotcha">
+  <h2>Recap</h2>
+  <ul>
+    <li>WebMachine is brutally RESTful!</li>
+    <li>Is not a framework!</li>
+    <li>Conforms to HTTP RFC (methods, status codes)</li>
+    <li>Is all about Resources</li>
+  </ul>
+  <p>
+    You need to provide <strong>all</strong> the plumbing. <br/>
+    Want to serve JS & CSS, you write the resource. <br/>
+    Authorisation? Callback provided and you write the rest. <br/>
+    DB / ORM? Same.
+  </p>
+  <p>
+    <strong>Get the picture?</strong>
+  </p>
+</section>
+
+<section class="slide" id="resources">
+  <h2>Resources</h2>
+  <ul>
+    <li>http://wiki.basho.com/Webmachine.html</li>
+    <li>https://github.com/basho/rebar</li>
+    <li>http://alancastro.org/2010/05/01/erlang-application-management-with-rebar.html</li>
+    <li>http://learnyousomeerlang.com/ - Erlang eBook</li>
+    <li>http://www.chicagoboss.org/ - Fully Featured Framework</li>
+  </ul>
+</section>
+
+<section class="slide" id="questions">
+  <h2>Questions?</h2>
+  <p>
+  </p>
+</section>
+
+
+<section class="slide" id="one_more">
+  <h2>One More thing!</h2>
+  <p>
+    <strong>Feedback and suggestions for Erlang Factory Lite.</strong>
+  </p>
+  <img src="images/erlang_factory_bris.png"/>
+</section>
+
+<!-- deck.navigation snippet -->
+<a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+<a href="#" class="deck-next-link" title="Next">&#8594;</a>
+
+<!-- deck.status snippet -->
+<p class="deck-status">
+	<span class="deck-status-current"></span>
+	/
+	<span class="deck-status-total"></span>
+</p>
+
+<!-- deck.goto snippet -->
+<form action="." method="get" class="goto-form">
+	<label for="goto-slide">Go to slide:</label>
+	<input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
+	<datalist id="goto-datalist"></datalist>
+	<input type="submit" value="Go">
+</form>
+
+<!-- deck.hash snippet -->
+<a href="." title="Permalink to this slide" class="deck-permalink">#</a>
+
+
+<!-- Grab CDN jQuery, with a protocol relative URL; fall back to local if offline -->
+<script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+<script>window.jQuery || document.write('<script src="jquery-1.7.min.js"><\/script>')</script>
+
+<!-- Deck Core and extensions -->
+<script src="core/deck.core.js"></script>
+<script src="extensions/hash/deck.hash.js"></script>
+<script src="extensions/menu/deck.menu.js"></script>
+<script src="extensions/goto/deck.goto.js"></script>
+<script src="extensions/status/deck.status.js"></script>
+<script src="extensions/navigation/deck.navigation.js"></script>
+
+<!-- Initialize the deck -->
+<script>
+$(function() {
+	$.deck('.slide');
+});
+</script>
+
+</body>
+</html>
