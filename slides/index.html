@@ -60,13 +60,14 @@
   <p>
     Any language worth it's salt needs to provide a web development library or
     three. <br/>
-    www.coboloncogs.org anyone?
+    www.coboloncogs.org anyone? Srsly
   </p>
+
   <p>General approaches to the web:</p>
   <ul>
     <li>focus on heavy three-tier applications. Java/EE</li>
     <li>hide the web behind language-specific constructs. Rails/Django</li>
-    <li>provide low-level access to HTTP. Sinatra/Node.js</li>
+    <li>provide low-level access to HTTP. Node.js</li>
   </ul>
 </section>
 
@@ -79,8 +80,8 @@
   </p>
   <ul>
     <li>Resource Oriented</li>
-    <li>Well behaved</li>
-    <li>Simple?</li>
+    <li>HTTP Semantics</li>
+    <li>Simple</li>
   </ul>
   <p>
     WebMachine is not a "framework"!
@@ -145,8 +146,10 @@ to_html(ReqData, State) ->
     <strong>WebMachine is a resource server for the web!</strong>
   </p>
   <p>
-    Driven via HTTP methods (GET, PUT, POST, DELETE) and returning correct
-    status codes.
+    Driven via HTTP methods; GET, PUT, POST, DELETE
+  </p>
+  <p>
+    Uses correct HTTP status codes.
   </p>
   <p>
     Well defined place to handle each HTTP method.
@@ -168,6 +171,21 @@ to_html(ReqData, State) ->
 <section class="slide" id="resource_example2">
   <h2>Example Cont</h2>
   <img src="images/resources_2.png"/>
+</section>
+
+<section class="slide" id="resource_post">
+  <h2>Problems with POST</h2>
+  <ul>
+    <li>Overloaded Semantics</li>
+    <li>Create or Update?</li>
+    <li>Switch on post_is_create()</li>
+    <ul>
+      <li>true + create_path() = create</li>
+      <li>false + process_post() = update </li>
+    </ul>
+  </ul>
+
+  <img src="images/rage_face.jpg"/>
 </section>
 
 <section class="slide" id="erldtl_templates">
@@ -221,6 +239,7 @@ to_html(ReqData, State) ->
     <li>http://alancastro.org/2010/05/01/erlang-application-management-with-rebar.html</li>
     <li>http://learnyousomeerlang.com/ - Erlang eBook</li>
     <li>http://www.chicagoboss.org/ - Fully Featured Framework</li>
+    <li>https://github.com/mochi/mochiweb</li>
   </ul>
 </section>
 
